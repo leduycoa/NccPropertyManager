@@ -2,7 +2,7 @@
 model AgencySettings {
   id            String   @id @default(uuid())
   agencyId      String   @unique
-  config        Json?
+  config        Json?    @db.Json
   outgoingEmail String
   syncToken     String
   createdAt     DateTime @default(now())

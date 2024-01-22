@@ -8,20 +8,23 @@ import {
   Res,
   Get,
   SerializeOptions,
-  Logger,
   UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import RegisterDto from './dto/register.dto';
 import { LocalAuthenticationGuard } from '../guards/localAuthentication.guard';
-import { Response, response } from 'express';
 import JwtAuthenticationGuard from '../guards/jwt-authentication.guard';
 import LogInDto from './dto/login.dto';
 import { ApiBody } from '@nestjs/swagger';
 import { LoggerInterceptor } from '../utils/logging.interceptor';
+import RequestWithUser from '../interfaces/requestWithUser.interface';
+import { TransformDataInterceptor } from '../utils/transformData.interceptor';
+import { UserResponseDto } from '../users/dto/userResponse.dto';
 
 @Controller('auth')
 @UseInterceptors(LoggerInterceptor)
+@UseInterceptors(ClassSerializerInterceptor)
 @SerializeOptions({
   strategy: 'exposeAll',
 })
@@ -38,7 +41,7 @@ export class AuthenticationController {
   @ApiBody({ type: LogInDto })
   @UseGuards(LocalAuthenticationGuard)
   @Post('log-in')
-  async logIn(@Req() request, @Body() _body: LogInDto) {
+  async logIn(@Req() request: RequestWithUser, @Body() _body: LogInDto) {
     const { user } = request;
     const cookie = this.authenticationService.getCookieWithJwtToken(user.id);
     request.res.setHeader('Set-Cookie', cookie);
@@ -57,9 +60,8 @@ export class AuthenticationController {
 
   @UseGuards(JwtAuthenticationGuard)
   @Get()
-  authenticate(@Req() request) {
-    const user = request.user;
-    user.password = undefined;
-    return user;
+  @UseInterceptors(new TransformDataInterceptor(UserResponseDto))
+  authenticate(@Req() request: RequestWithUser) {
+    return request.user;
   }
 }

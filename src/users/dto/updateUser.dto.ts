@@ -1,48 +1,38 @@
 import {
   IsEmail,
+  IsEnum,
   IsNotEmpty,
-  IsOptional,
   IsString,
-  IsUUID,
-  MinLength,
 } from 'class-validator';
 import { Userstatus, UserType } from '../constants/userConstant';
+import { CanBeUndefined } from '../../utils/canBeUndefined';
 export class UpdateUserDto {
   @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  firstName: string;
+  @CanBeUndefined()
+  firstName?: string;
 
   @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  lastName: string;
+  @CanBeUndefined()
+  lastName?: string;
 
   @IsEmail()
   @IsNotEmpty()
-  @IsOptional()
-  email: string;
+  @CanBeUndefined()
+  email?: string;
 
   @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  @MinLength(7)
-  password: string;
+  @CanBeUndefined()
+  phoneNumber?: string;
 
   @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  phoneNumber: string;
+  @IsEnum(UserType)
+  @CanBeUndefined()
+  status?: Userstatus;
 
   @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  status: Userstatus;
-
-  @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  type: UserType;
+  @IsEnum(UserType)
+  @CanBeUndefined()
+  type?: UserType;
 }
 
 export default UpdateUserDto;

@@ -8,6 +8,7 @@ import TokenPayload from '../interfaces/tonken.interface';
 
 @Injectable()
 export class AuthenticationService {
+  private readonly logger = new Logger (AuthenticationService.name);
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
@@ -17,7 +18,7 @@ export class AuthenticationService {
   public async register(registrationData: RegisterDto) {
     try {
       await this.userService.checkEmailExist(registrationData.email)
-      const hashedPassword = await bcrypt.hash(null, 10);
+      const hashedPassword = await bcrypt.hash(registrationData.password, 10);
       const createdUser = await this.userService.createUser({
         ...registrationData,
         password: hashedPassword,
@@ -25,6 +26,7 @@ export class AuthenticationService {
       delete createdUser.password;
       return createdUser;
     } catch (error) {
+      this.logger.error(error.message)
       throw new HttpException(
         error.message,
         HttpStatus.BAD_REQUEST,
@@ -39,6 +41,7 @@ export class AuthenticationService {
       user.password = undefined;
       return user;
     } catch (error) {
+      this.logger.error(error.message)
       throw new HttpException(
         error,
         HttpStatus.BAD_REQUEST,
@@ -55,6 +58,7 @@ export class AuthenticationService {
       hashedPassword,
     );
     if (!isPasswordMatching) {
+      this.logger.error('Wrong credentials provided')
       throw new HttpException(
         'Wrong credentials provided',
         HttpStatus.BAD_REQUEST,
@@ -70,7 +74,7 @@ export class AuthenticationService {
         'JWT_EXPIRATION_TIME',
       )}`;
     } catch (error) {
-      Logger.error(error);
+      this.logger.error(error.message)
       throw new HttpException(
         error,
         HttpStatus.BAD_REQUEST,

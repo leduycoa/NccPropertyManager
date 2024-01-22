@@ -1,37 +1,49 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, Res, Response } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Prisma } from '@prisma/client';
+import { response } from 'express';
+
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) { }
+  private readonly logger = new Logger(UserService.name);
+  constructor(private prisma: PrismaService) {}
 
-  async getUserById(
-    id: string,
-  ) {
-   const user = await this.prisma.user.findUnique({
-      where: {
-        id
-      },
-      select: {
-        id: true,
-        email: true,
-      },
-    });
-    return user
+  async getUserById(id: string) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id,
+        },
+      });
+      if (!user)
+        throw new HttpException(
+          `User with id ${id} not found`,
+          HttpStatus.BAD_REQUEST,
+        );
+      return user;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async getUserByEmail(email: string) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email
-      },
-      select: {
-        id: true,
-        email: true,
-        password: true
-      },
-    });
-    return user
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          email,
+        },
+      });
+      if (!user)
+        throw new HttpException(
+          `User with email ${email} not found`,
+          HttpStatus.BAD_REQUEST,
+        );
+      return user;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async getUsers(params: {
@@ -41,50 +53,71 @@ export class UserService {
     where?: Prisma.UserWhereInput;
     orderBy?: Prisma.UserOrderByWithRelationInput;
   }): Promise<User[]> {
-    const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.user.findMany({
-      skip,
-      take,
-      cursor,
-      where,
-      orderBy,
-    });
+    try {
+      const { skip, take, cursor, where, orderBy } = params;
+      const users = this.prisma.user.findMany({
+        skip,
+        take,
+        cursor,
+        where,
+        orderBy,
+      });
+      return users;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
     try {
+      await this.checkEmailExist(data.email);
       return this.prisma.user.create({
         data,
       });
     } catch (error) {
-      throw error
+      this.logger.error(error.message);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
-  async updateUser(
-    params: {
-      where: Prisma.UserWhereUniqueInput;
-    },
-    data: Prisma.UserUpdateInput
-  ): Promise<User> {
-    const { where } = params;
-    return this.prisma.user.update({
-      data,
-      where,
-    });
+  async updateUserById(
+    id: string,
+    data: Prisma.UserUpdateInput,
+  ): Promise<void> {
+    try {
+      await this.getUserById(id);
+      await this.prisma.user.update({
+        where: {
+          id,
+        },
+        data,
+      });
+      return;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
-  async deleteUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
-    return this.prisma.user.delete({
-      where,
-    });
+  async deleteUserById(id: string): Promise<void> {
+    try {
+      await this.getUserById(id);
+      await this.prisma.user.delete({
+        where: {
+          id,
+        },
+      });
+      return;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async checkEmailExist(email: string) {
-    const userExist = await this.getUserByEmail(email)
-    if (userExist) throw new HttpException(
-      'email early exist!',
-      HttpStatus.BAD_REQUEST,
-    );
+    const userExist = await this.getUserByEmail(email);
+    if (userExist)
+      throw new HttpException('email early exist!', HttpStatus.BAD_REQUEST);
   }
 }

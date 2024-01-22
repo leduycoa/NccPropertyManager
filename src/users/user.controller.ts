@@ -7,6 +7,9 @@ import {
   Put,
   Delete,
   UseGuards,
+  SerializeOptions,
+  UseInterceptors,
+  Patch,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User as UserModel } from '@prisma/client';
@@ -14,44 +17,50 @@ import UpdateUserDto from './dto/updateUser.dto';
 import CreateUserDto from './dto/createUser.dto';
 import JwtAuthenticationGuard from '../guards/jwt-authentication.guard';
 import { LocalAuthenticationGuard } from '../guards/localAuthentication.guard';
+import { LoggerInterceptor } from '../utils/logging.interceptor';
+import { TransformDataInterceptor } from 'src/utils/transformData.interceptor';
+import { UserResponseDto } from './dto/userResponse.dto';
 
 @Controller('users')
+@UseInterceptors(LoggerInterceptor)
+@SerializeOptions({
+  strategy: 'exposeAll',
+})
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-  ) { }
+  constructor(private readonly userService: UserService) {}
 
   @Post()
-  async createUser(
-    @Body() userData: CreateUserDto,
-  ): Promise<UserModel> {
+  @UseInterceptors(new TransformDataInterceptor(UserResponseDto))
+  async createUser(@Body() userData: CreateUserDto): Promise<UserModel> {
     return this.userService.createUser(userData);
-  };
+  }
 
   @Get()
-  // @UseGuards(LocalAuthenticationGuard)
   @UseGuards(JwtAuthenticationGuard)
+  @UseInterceptors(new TransformDataInterceptor(UserResponseDto))
   async getUsers(@Param() queryOptions: Object) {
     return this.userService.getUsers({
-      where: queryOptions
+      where: queryOptions,
     });
   }
 
   @Get(':id')
+  @UseInterceptors(new TransformDataInterceptor(UserResponseDto))
   async getUserById(@Param('id') id: string) {
     return this.userService.getUserById(id);
   }
 
   @Delete(':id')
-  async deleteUser(@Param('id') id: string) {
-    return this.userService.deleteUser({ id });
+  async deleteUserById(@Param('id') id: string) {
+    return this.userService.deleteUserById(id);
   }
 
-  @Put(':id')
-  async updateUser(@Param('id') id: string, @Body() userData: UpdateUserDto,) {
-    return this.userService.updateUser({
-      where: { id }
-    }, userData);
+  @Patch(':id')
+  @UseInterceptors(new TransformDataInterceptor(UserResponseDto))
+  async updateUserById(
+    @Param('id') id: string,
+    @Body() userData: UpdateUserDto,
+  ) {
+    return this.userService.updateUserById(id, userData);
   }
-
 }
