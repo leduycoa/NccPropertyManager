@@ -8,6 +8,8 @@ import {
   Res,
   Get,
   SerializeOptions,
+  Logger,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import RegisterDto from './dto/register.dto';
@@ -16,19 +18,20 @@ import { Response, response } from 'express';
 import JwtAuthenticationGuard from '../guards/jwt-authentication.guard';
 import LogInDto from './dto/login.dto';
 import { ApiBody } from '@nestjs/swagger';
-import { valid } from '@hapi/joi';
-import { validate } from 'class-validator';
+import { LoggerInterceptor } from '../utils/logging.interceptor';
 
 @Controller('auth')
+@UseInterceptors(LoggerInterceptor)
 @SerializeOptions({
   strategy: 'exposeAll',
 })
 export class AuthenticationController {
-  constructor(private readonly authenticationService: AuthenticationService) {}
+  constructor(private readonly authenticationService: AuthenticationService) { }
 
   @Post('register')
   async register(@Body() registrationData: RegisterDto) {
     return this.authenticationService.register(registrationData);
+
   }
 
   @HttpCode(200)

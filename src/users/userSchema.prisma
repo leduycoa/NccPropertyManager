@@ -4,7 +4,7 @@ model User {
   lastName        String
   email           String           @unique
   password        String
-  phoneNumber     String?
+  phoneNumber     String? 
   status          Userstatus       @default(ACTIVE)
   type            UserType         @default(USER)
   inviteSent      DateTime?

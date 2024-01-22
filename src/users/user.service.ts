@@ -1,27 +1,37 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Prisma } from '@prisma/client';
-
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) { }
 
   async getUserById(
     id: string,
-  ): Promise<User | null> {
-    return this.prisma.user.findUnique({
+  ) {
+   const user = await this.prisma.user.findUnique({
       where: {
         id
       },
+      select: {
+        id: true,
+        email: true,
+      },
     });
+    return user
   }
 
-  async getByEmail(email: string) {
-    return this.prisma.user.findUnique({
+  async getUserByEmail(email: string) {
+    const user = await this.prisma.user.findUnique({
       where: {
         email
-      }
-    })
+      },
+      select: {
+        id: true,
+        email: true,
+        password: true
+      },
+    });
+    return user
   }
 
   async getUsers(params: {
@@ -42,9 +52,13 @@ export class UserService {
   }
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prisma.user.create({
-      data,
-    });
+    try {
+      return this.prisma.user.create({
+        data,
+      });
+    } catch (error) {
+      throw error
+    }
   }
 
   async updateUser(
@@ -64,5 +78,13 @@ export class UserService {
     return this.prisma.user.delete({
       where,
     });
+  }
+
+  async checkEmailExist(email: string) {
+    const userExist = await this.getUserByEmail(email)
+    if (userExist) throw new HttpException(
+      'email early exist!',
+      HttpStatus.BAD_REQUEST,
+    );
   }
 }

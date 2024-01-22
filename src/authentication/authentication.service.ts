@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UserService }from '../users/user.service';
 import RegisterDto from './dto/register.dto';
@@ -16,26 +16,31 @@ export class AuthenticationService {
 
   public async register(registrationData: RegisterDto) {
     try {
-      const hashedPassword = await bcrypt.hash(registrationData.password, 10);
+      await this.userService.checkEmailExist(registrationData.email)
+      const hashedPassword = await bcrypt.hash(null, 10);
       const createdUser = await this.userService.createUser({
         ...registrationData,
         password: hashedPassword,
       });
+      delete createdUser.password;
       return createdUser;
     } catch (error) {
-      throw new HttpException(error.message, error.status);
+      throw new HttpException(
+        error.message,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
   public async getAuthenticatedUser(email: string, plainTextPassword: string) {
     try {
-      const user = await this.userService.getByEmail(email);
+      const user = await this.userService.getUserByEmail(email);
       await this.verifyPassword(plainTextPassword, user.password);
       user.password = undefined;
       return user;
     } catch (error) {
       throw new HttpException(
-        'Wrong email or password',
+        error,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -58,14 +63,23 @@ export class AuthenticationService {
   }
 
   public getCookieWithJwtToken(id: string) {
-    const payload: TokenPayload = { id };
-    const token = this.jwtService.sign(payload);
-    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
-      'JWT_EXPIRATION_TIME',
-    )}`;
+    try {
+      const payload: TokenPayload = { id };
+      const token = this.jwtService.sign(payload);
+      return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
+        'JWT_EXPIRATION_TIME',
+      )}`;
+    } catch (error) {
+      Logger.error(error);
+      throw new HttpException(
+        error,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   public getCookieForLogOut() {
     return `Authentication=; HttpOnly; Path=/; Max-Age=0`;
   }
+
 }
