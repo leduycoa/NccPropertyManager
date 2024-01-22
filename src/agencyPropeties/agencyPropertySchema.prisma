@@ -1,0 +1,13 @@
+model AgencyProperty {
+  id          String   @id @default(uuid())
+  propertyId  String
+  agencyId    String
+  isTemporary Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // Define the relationships
+  properties    Property @relation(fields: [propertyId], references: [id])
+  agencies      Agency   @relation(fields: [agencyId], references: [id])
+
+  @@map("agencyProperties")
+}

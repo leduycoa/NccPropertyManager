@@ -1,9 +1,13 @@
-import { IsEmail, IsNotEmpty, IsString, IsUUID, MinLength } from 'class-validator';
-
+import { IsDate, IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
+import { Userstatus, UserType } from '../constants/userConstant';
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  firstName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  lastName: string;
 
   @IsEmail()
   @IsNotEmpty()
@@ -13,6 +17,23 @@ export class CreateUserDto {
   @IsNotEmpty()
   @MinLength(7)
   password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  phoneNumber: string;
+
+  @IsString()
+  @IsNotEmpty()
+  status: Userstatus;
+
+  @IsString()
+  @IsNotEmpty()
+  type: UserType;
+
+  @IsDate()
+  @IsOptional()
+  inviteSent: Date
+
 }
 
 export default CreateUserDto;

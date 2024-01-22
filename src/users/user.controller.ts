@@ -39,18 +39,18 @@ export class UserController {
 
   @Get(':id')
   async getUserById(@Param('id') id: string) {
-    return this.userService.getUserById({ id: Number(id) });
+    return this.userService.getUserById(id);
   }
 
   @Delete(':id')
   async deleteUser(@Param('id') id: string) {
-    return this.userService.deleteUser({ id: Number(id) });
+    return this.userService.deleteUser({ id });
   }
 
   @Put(':id')
   async updateUser(@Param('id') id: string, @Body() userData: UpdateUserDto,) {
     return this.userService.updateUser({
-      where: { id: Number(id) }
+      where: { id }
     }, userData);
   }
 

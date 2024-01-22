@@ -33,3 +33,7 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+prisma/schema.prisma
+prisma/migrations
+package-lock.json
+.env*

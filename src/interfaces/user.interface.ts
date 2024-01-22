@@ -1,13 +1,15 @@
+import { Userstatus, UserType } from '../users/constants/userConstant';
 interface BuildUser {
-  username: string,
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  userType: string
-  phone: string,
-  status: string,
-  gender: string,
+  id: string,
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string,
+  phoneNumbe: string,
+  status: Userstatus,
+  type: UserType,
+  inviteSent: Date,
+  onboardTracking: JSON,
 }
 
 export default BuildUser;

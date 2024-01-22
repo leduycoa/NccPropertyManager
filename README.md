@@ -32,6 +32,22 @@
 $ yarn install
 ```
 
+## Change file .env.example => .env
+
+## Run docker
+```bash
+$ docker compose up -d
+```
+
+## Init Prisma
+```bash
+$ npx prisma init
+```
+## Genarate schema with prisma (create schema in database)
+```bash
+$ npm run migrate
+```
+
 ## Running the app
 
 ```bash

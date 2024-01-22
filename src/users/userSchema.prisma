@@ -1,0 +1,33 @@
+model User {
+  id              String           @id @default(uuid())
+  firstName       String
+  lastName        String
+  email           String           @unique
+  password        String
+  phoneNumber     String?
+  status          Userstatus       @default(ACTIVE)
+  type            UserType         @default(USER)
+  inviteSent      DateTime?
+  onboardTracking Json?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  // Define the userProperties relation
+  userProperties  UserProperty[]
+  agencyAgent     AgencyAgent[]
+
+  @@map("users")
+}
+
+enum Userstatus {
+  ACTIVE
+  DELETED
+  INACTIVE
+}
+
+enum UserType {
+  USER
+  AGENT
+  LEAD
+  SUPLLIER
+  OTHER
+}

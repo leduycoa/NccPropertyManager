@@ -1,0 +1,19 @@
+model Property {
+  id             String           @id @default(uuid())
+  streetline     String
+  status         Propertystatus   @default(ACTIVE)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  @@map("properties")
+
+  // Define the userProperties relation
+  userProperties UserProperty[]
+  agencyProperties AgencyProperty[]
+
+}
+
+enum Propertystatus {
+  ACTIVE
+  DELETED
+  INACTIVE
+}

@@ -1,18 +1,38 @@
-import { IsEmail, IsString, IsNotEmpty, MinLength, IsUUID } from 'class-validator';
- 
+import { IsEmail, IsString, IsNotEmpty, MinLength, IsUUID, IsOptional, IsDate } from 'class-validator';
+import { Userstatus, UserType } from '../../users/constants/userConstant';
 export class RegisterDto {
+  @IsString()
+  @IsNotEmpty()
+  firstName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  lastName: string;
+
   @IsEmail()
   @IsNotEmpty()
   email: string;
- 
-  @IsString()
-  @IsNotEmpty()
-  name: string;
- 
+
   @IsString()
   @IsNotEmpty()
   @MinLength(7)
   password: string;
+
+  @IsString()
+  @IsOptional()
+  phoneNumber: string;
+
+  @IsString()
+  @IsOptional()
+  status: Userstatus;
+
+  @IsString()
+  @IsOptional()
+  type: UserType;
+
+  @IsDate()
+  @IsOptional()
+  inviteSent: Date
 }
- 
+
 export default RegisterDto;

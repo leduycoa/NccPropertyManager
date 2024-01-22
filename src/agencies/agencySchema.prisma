@@ -1,0 +1,17 @@
+model Agency {
+  id             String           @id @default(uuid())
+  name           String
+  logo           String
+  address        String
+  phoneNumber    String
+  companyEmail   String
+  isDeleted      Boolean
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  // Define the agencyAgents relation
+  agencyAgents   AgencyAgent[]
+  agencySettings AgencySettings?
+  agencyProperties AgencyProperty[]
+
+  @@map("agencies")
+}
