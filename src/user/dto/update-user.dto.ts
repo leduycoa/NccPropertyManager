@@ -4,8 +4,8 @@ import {
   IsNotEmpty,
   IsString,
 } from 'class-validator';
-import { Userstatus, UserType } from '../constants/userConstant';
-import { CanBeUndefined } from '../../utils/canBeUndefined';
+import { Userstatus, UserType } from '../constants/user.constant';
+import { CanBeUndefined } from '../../utils/can-be-undefined.util';
 export class UpdateUserDto {
   @IsString()
   @CanBeUndefined()

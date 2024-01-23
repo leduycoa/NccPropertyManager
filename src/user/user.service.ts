@@ -6,7 +6,7 @@ import { response } from 'express';
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name);
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async getUserById(id: string) {
     try {
@@ -34,11 +34,6 @@ export class UserService {
           email,
         },
       });
-      if (!user)
-        throw new HttpException(
-          `User with email ${email} not found`,
-          HttpStatus.BAD_REQUEST,
-        );
       return user;
     } catch (error) {
       this.logger.error(error.message);

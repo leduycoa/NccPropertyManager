@@ -13,14 +13,14 @@ import {
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import RegisterDto from './dto/register.dto';
-import { LocalAuthenticationGuard } from '../guards/localAuthentication.guard';
+import { LocalAuthenticationGuard } from '../guards/local-authentication.guard';
 import JwtAuthenticationGuard from '../guards/jwt-authentication.guard';
 import LogInDto from './dto/login.dto';
 import { ApiBody } from '@nestjs/swagger';
-import { LoggerInterceptor } from '../utils/logging.interceptor';
-import RequestWithUser from '../interfaces/requestWithUser.interface';
-import { TransformDataInterceptor } from '../utils/transformData.interceptor';
-import { UserResponseDto } from '../users/dto/userResponse.dto';
+import { LoggerInterceptor } from '../Interceptors/logging.interceptor';
+import RequestWithUser from '../interfaces/request-with-user.interface';
+import { TransformDataInterceptor } from '../Interceptors/transformData.interceptor';
+import { UserResponseDto } from '../user/dto/user-response.dto';
 
 @Controller('auth')
 @UseInterceptors(LoggerInterceptor)

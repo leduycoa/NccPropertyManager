@@ -1,5 +1,5 @@
 import { IsEmail, IsString, IsNotEmpty, MinLength, IsUUID, IsOptional, IsDate } from 'class-validator';
-import { Userstatus, UserType } from '../../users/constants/userConstant';
+import { Userstatus, UserType } from '../../user/constants/user.constant';
 export class RegisterDto {
   @IsString()
   @IsNotEmpty()

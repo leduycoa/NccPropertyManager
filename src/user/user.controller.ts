@@ -13,13 +13,13 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User as UserModel } from '@prisma/client';
-import UpdateUserDto from './dto/updateUser.dto';
-import CreateUserDto from './dto/createUser.dto';
+import UpdateUserDto from './dto/update-user.dto';
+import CreateUserDto from './dto/create-user.dto';
 import JwtAuthenticationGuard from '../guards/jwt-authentication.guard';
-import { LocalAuthenticationGuard } from '../guards/localAuthentication.guard';
-import { LoggerInterceptor } from '../utils/logging.interceptor';
-import { TransformDataInterceptor } from 'src/utils/transformData.interceptor';
-import { UserResponseDto } from './dto/userResponse.dto';
+import { LocalAuthenticationGuard } from '../guards/local-authentication.guard';
+import { LoggerInterceptor } from '../Interceptors/logging.interceptor';
+import { TransformDataInterceptor } from 'src/Interceptors/transformData.interceptor';
+import { UserResponseDto } from './dto/user-response.dto';
 
 @Controller('users')
 @UseInterceptors(LoggerInterceptor)

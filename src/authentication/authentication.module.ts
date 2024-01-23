@@ -1,7 +1,7 @@
 
 import { Module } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
-import { UserModule } from '../users/user.module';
+import { UserModule } from '../user/user.module';
 import { AuthenticationController } from './authentication.controller';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from '../authentication/strategies/local.strategy';

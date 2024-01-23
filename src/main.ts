@@ -2,7 +2,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
 import { ClassSerializerInterceptor, LogLevel, ValidationPipe } from '@nestjs/common';
-import { LoggerInterceptor } from './utils/logging.interceptor';
+import { LoggerInterceptor } from './Interceptors/logging.interceptor';
 
 async function bootstrap() {
   const isProduction = process.env.NODE_ENV === 'production';

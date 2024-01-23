@@ -1,7 +1,7 @@
 import { IsDate, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
-import { Userstatus, UserType } from '../constants/userConstant';
+import { Userstatus, UserType } from '../constants/user.constant';
 import { Prisma } from '@prisma/client';
-import IsJsonObject from '../../utils/isJsonObject';
+import IsJsonObject from '../../utils/is-json-object.util';
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
