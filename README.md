@@ -47,7 +47,10 @@ $ npx prisma init
 ```bash
 $ npm run migrate
 ```
-
+## Seed data admin in system 
+```bash
+$ npm run seed
+```
 ## Running the app
 
 ```bash

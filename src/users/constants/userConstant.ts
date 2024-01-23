@@ -7,7 +7,7 @@ export enum Userstatus {
 export enum UserType {
     user = 'USER',
     agent = 'AGENT',
-    lead = 'LEAD',
+    admin = 'ADMIN',
     supplier = 'SUPLLIER',
     other = 'OTHER',
 }

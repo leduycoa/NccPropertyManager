@@ -27,7 +27,7 @@ enum Userstatus {
 enum UserType {
   USER
   AGENT
-  LEAD
+  ADMIN
   SUPLLIER
   OTHER
 }
