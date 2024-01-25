@@ -4,7 +4,6 @@ import {
   Param,
   Post,
   Body,
-  Put,
   Delete,
   UseGuards,
   SerializeOptions,
@@ -16,13 +15,10 @@ import { User as UserModel } from '@prisma/client';
 import UpdateUserDto from './dto/update-user.dto';
 import CreateUserDto from './dto/create-user.dto';
 import JwtAuthenticationGuard from '../guards/jwt-authentication.guard';
-import { LocalAuthenticationGuard } from '../guards/local-authentication.guard';
-import { LoggerInterceptor } from '../Interceptors/logging.interceptor';
-import { TransformDataInterceptor } from 'src/Interceptors/transformData.interceptor';
+import { TransformDataInterceptor } from 'src/Interceptors/transform-data.interceptor';
 import { UserResponseDto } from './dto/user-response.dto';
 
 @Controller('users')
-@UseInterceptors(LoggerInterceptor)
 @SerializeOptions({
   strategy: 'exposeAll',
 })
@@ -38,7 +34,7 @@ export class UserController {
   @Get()
   @UseGuards(JwtAuthenticationGuard)
   @UseInterceptors(new TransformDataInterceptor(UserResponseDto))
-  async getUsers(@Param() queryOptions: Object) {
+  async getUsers(@Param() queryOptions: object) {
     return this.userService.getUsers({
       where: queryOptions,
     });

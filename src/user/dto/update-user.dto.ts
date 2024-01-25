@@ -1,9 +1,4 @@
-import {
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsString,
-} from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { Userstatus, UserType } from '../constants/user.constant';
 import { CanBeUndefined } from '../../utils/can-be-undefined.util';
 export class UpdateUserDto {

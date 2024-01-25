@@ -1,4 +1,12 @@
-import { IsDate, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
+import {
+  IsDate,
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 import { Userstatus, UserType } from '../constants/user.constant';
 import { Prisma } from '@prisma/client';
 import IsJsonObject from '../../utils/is-json-object.util';
@@ -36,11 +44,11 @@ export class CreateUserDto {
 
   @IsDate()
   @IsOptional()
-  inviteSent: Date
+  inviteSent: Date;
 
   @IsJsonObject()
   @IsOptional()
-  onboardTracking: Prisma.InputJsonObject
+  onboardTracking: Prisma.InputJsonObject;
 }
 
 export default CreateUserDto;

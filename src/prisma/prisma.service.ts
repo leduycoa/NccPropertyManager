@@ -1,6 +1,11 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Logger,
+} from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
- 
+
 @Injectable()
 export class PrismaService
   extends PrismaClient<Prisma.PrismaClientOptions, Prisma.LogLevel>
@@ -30,7 +35,7 @@ export class PrismaService
     });
   }
   async onModuleInit() {
-    await this.$connect();  
+    await this.$connect();
     //logger for query
     this.$on('error', ({ message }) => {
       this.logger.error(message);
@@ -45,7 +50,7 @@ export class PrismaService
       this.logger.log(`${query}; ${params}`);
     });
   }
- 
+
   async onModuleDestroy() {
     await this.$disconnect();
   }
