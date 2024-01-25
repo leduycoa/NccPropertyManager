@@ -1,5 +1,16 @@
-import { IsEmail, IsString, IsNotEmpty, MinLength, IsUUID, IsOptional, IsDate } from 'class-validator';
-import { Userstatus, UserType } from '../../user/constants/user.constant';
+import {
+  IsEmail,
+  IsString,
+  IsNotEmpty,
+  MinLength,
+  IsUUID,
+  IsOptional,
+  IsDate,
+} from 'class-validator';
+import {
+  UserstatusEnum,
+  UserTypeEnum,
+} from '../../user/constants/user.constant';
 export class RegisterDto {
   @IsString()
   @IsNotEmpty()
@@ -24,15 +35,15 @@ export class RegisterDto {
 
   @IsString()
   @IsOptional()
-  status: Userstatus;
+  status: UserstatusEnum;
 
   @IsString()
   @IsOptional()
-  type: UserType;
+  type: UserTypeEnum;
 
   @IsDate()
   @IsOptional()
-  inviteSent: Date
+  inviteSent: Date;
 }
 
 export default RegisterDto;

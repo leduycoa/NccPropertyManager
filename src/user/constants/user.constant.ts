@@ -1,14 +1,13 @@
-export enum Userstatus {
-    active = 'ACTIVE',
-    deleted = 'DELETED',
-    inactive = 'INACTIVE'
+export enum UserstatusEnum {
+  ACTIVE = 'ACTIVE',
+  DELETED = 'DELETED',
+  INACTIVE = 'INACTIVE',
 }
 
-export enum UserType {
-    user = 'USER',
-    agent = 'AGENT',
-    admin = 'ADMIN',
-    supplier = 'SUPLLIER',
-    other = 'OTHER',
+export enum UserTypeEnum {
+  USER = 'USER',
+  AGENT = 'AGENT',
+  ADMIN = 'ADMIN',
+  SUPLLIER = 'SUPLLIER',
+  OTHER = 'OTHER',
 }
-

@@ -1,4 +1,11 @@
-import { HttpException, HttpStatus, Injectable, Logger, Res, Response } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  Res,
+  Response,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Prisma } from '@prisma/client';
 import { response } from 'express';
@@ -6,7 +13,7 @@ import { response } from 'express';
 @Injectable()
 export class UserService {
   private readonly logger = new Logger(UserService.name);
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async getUserById(id: string) {
     try {
