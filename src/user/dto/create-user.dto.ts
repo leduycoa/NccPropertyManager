@@ -5,9 +5,10 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
   MinLength,
 } from 'class-validator';
-import { Userstatus, UserType } from '../constants/user.constant';
+import { UserstatusEnum, UserTypeEnum } from '../constants/user.constant';
 import { Prisma } from '@prisma/client';
 import IsJsonObject from '../../utils/is-json-object.util';
 export class CreateUserDto {
@@ -33,14 +34,14 @@ export class CreateUserDto {
   phoneNumber: string;
 
   @IsString()
-  @IsEnum(Userstatus)
+  @IsEnum(UserstatusEnum)
   @IsOptional()
-  status: Userstatus;
+  status: UserstatusEnum;
 
   @IsString()
-  @IsEnum(UserType)
+  @IsEnum(UserTypeEnum)
   @IsOptional()
-  type: UserType;
+  type: UserTypeEnum;
 
   @IsDate()
   @IsOptional()
