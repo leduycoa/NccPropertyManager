@@ -1,39 +1,38 @@
-
 import {
-    Injectable,
-    NestInterceptor,
-    ExecutionContext,
-    CallHandler,
-    Logger,
-  } from '@nestjs/common';
-  import { Request, Response } from 'express';
-   
-  @Injectable()
-  export class LoggerInterceptor implements NestInterceptor {
-    private readonly logger = new Logger('HTTP');
-   
-    intercept(context: ExecutionContext, next: CallHandler) {
-      const httpContext = context.switchToHttp();
-      const request = httpContext.getRequest<Request>();
-      const response = httpContext.getResponse<Response>();
-   
-      response.on('finish', () => {
-        const { method, originalUrl } = request;
-        const { statusCode, statusMessage } = response;
-   
-        const message = `${method} ${originalUrl} ${statusCode} ${statusMessage}`;
-   
-        if (statusCode >= 500) {
-          return this.logger.error(message);
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+  Logger,
+} from '@nestjs/common';
+import { Request } from 'express';
+import { catchError, throwError } from 'rxjs';
+
+@Injectable()
+export class LoggerInterceptor implements NestInterceptor {
+  private readonly logger = new Logger('HTTP');
+
+  intercept(context: ExecutionContext, next: CallHandler) {
+    const now = Date.now();
+    return next.handle().pipe(
+      catchError((err) => {
+        if (context.getType() === 'http') {
+          const httpContext = context.switchToHttp();
+          const request = httpContext.getRequest<Request>();
+          const { method, originalUrl } = request;
+          const { status, message } = err;
+
+          const logMessage = `${method} ${originalUrl} ${status} ${message} (${Date.now() - now}ms)`;
+
+          if (status >= 400) {
+            this.logger.warn(logMessage);
+          } else {
+            this.logger.error(logMessage);
+          }
         }
-   
-        if (statusCode >= 400) {
-          return this.logger.warn(message);
-        }
-   
-        return this.logger.log(message);
-      });
-   
-      return next.handle();
-    }
+
+        return throwError(() => err);
+      }),
+    );
   }
+}

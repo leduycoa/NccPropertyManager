@@ -1,4 +1,11 @@
-import { IsEmail, IsString, IsNotEmpty, MinLength, IsUUID, IsOptional, IsDate } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsNotEmpty,
+  MinLength,
+  IsOptional,
+  IsDate,
+} from 'class-validator';
 import { Userstatus, UserType } from '../../user/constants/user.constant';
 export class RegisterDto {
   @IsString()
@@ -32,7 +39,7 @@ export class RegisterDto {
 
   @IsDate()
   @IsOptional()
-  inviteSent: Date
+  inviteSent: Date;
 }
 
 export default RegisterDto;
