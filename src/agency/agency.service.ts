@@ -23,18 +23,27 @@ export class AgencyService {
       agencyDTO.phoneNumber,
     );
 
-    try {
-      const data: Prisma.AgencyCreateInput = {
-        ...agencyDTO,
-        isDeleted: false,
-      };
-      return this.prisma.agency.create({
-        data,
-      });
-    } catch (error) {
-      this.logger.error(error.message);
-      throw new BadRequestException(error.message);
+    const data: Prisma.AgencyCreateInput = {
+      ...agencyDTO,
+      isDeleted: false,
+    };
+    return this.prisma.agency.create({
+      data,
+    });
+  }
+
+  async getAgencyById(agencyId: string) {
+    const agency = await this.prisma.agency.findUnique({
+      where: {
+        id: agencyId,
+      },
+    });
+
+    if (!agency) {
+      throw new BadRequestException(`Agency with id ${agencyId} not found`);
     }
+
+    return agency;
   }
 
   async checkPhoneEmailExist(

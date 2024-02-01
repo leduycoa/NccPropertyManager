@@ -6,6 +6,8 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
+  MaxLength,
   MinLength,
 } from 'class-validator';
 import { UserstatusEnum, UserTypeEnum } from '../constants/user.constant';
@@ -14,14 +16,19 @@ import IsJsonObject from '../../utils/is-json-object.util';
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
+  @MaxLength(50)
   firstName: string;
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(50)
   lastName: string;
 
-  @IsEmail()
+  @Matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g, {
+    message: 'Invalid email address',
+  })
   @IsNotEmpty()
+  @MaxLength(50)
   email: string;
 
   @IsString()

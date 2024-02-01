@@ -1,4 +1,4 @@
-export enum AgencyAgentTypeEnum {
+export enum AgencyAgentRoleEnum {
   OWNER = 'OWNER',
   ADMIN = 'ADMIN',
   MEMBER = 'MEMBER',
