@@ -2,7 +2,7 @@ model AgencyAgent {
   id             String          @id @default(uuid())
   agencyId       String
   userId         String
-  portfolioCount Int
+  portfolioCount Int?
   isDeleted      Boolean         @default(false)
   isActive       Boolean         @default(true)
   role           AgencyAgentType

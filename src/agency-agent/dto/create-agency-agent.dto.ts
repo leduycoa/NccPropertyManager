@@ -1,5 +1,6 @@
 import {
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsString,
   IsUUID,
@@ -7,7 +8,7 @@ import {
 } from 'class-validator';
 import { AgencyAgentTypeEnum } from '../constant/agency-agent.constant';
 
-export class CreateAgencyAgentOwnerDTO {
+export class CreateAgencyAgentDTO {
   @IsUUID()
   agencyId: string;
 
@@ -24,13 +25,9 @@ export class CreateAgencyAgentOwnerDTO {
   email: string;
 
   @IsString()
-  @IsNotEmpty()
   @MinLength(7)
-  password: string;
+  password?: string;
 
-  @IsString()
-  @IsNotEmpty()
-  phoneNumber: string;
-
-  portfolioCount: number;
+  @IsEnum(AgencyAgentTypeEnum)
+  type: AgencyAgentTypeEnum;
 }

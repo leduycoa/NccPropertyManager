@@ -23,18 +23,13 @@ export class AgencyService {
       agencyDTO.phoneNumber,
     );
 
-    try {
-      const data: Prisma.AgencyCreateInput = {
-        ...agencyDTO,
-        isDeleted: false,
-      };
-      return this.prisma.agency.create({
-        data,
-      });
-    } catch (error) {
-      this.logger.error(error.message);
-      throw new BadRequestException(error.message);
-    }
+    const data: Prisma.AgencyCreateInput = {
+      ...agencyDTO,
+      isDeleted: false,
+    };
+    return this.prisma.agency.create({
+      data,
+    });
   }
 
   async checkPhoneEmailExist(
