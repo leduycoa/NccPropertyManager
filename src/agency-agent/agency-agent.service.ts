@@ -3,13 +3,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAgencyAgentDTO } from './dto/create-agency-agent.dto';
 import { AgencyAgent, Prisma, User } from '@prisma/client';
 import { UserTypeEnum, UserstatusEnum } from 'src/user/constants/user.constant';
-import { AgencyAgentTypeEnum } from './constant/agency-agent.constant';
+import { AgencyAgentRoleEnum } from './constant/agency-agent.constant';
 import { UserService } from 'src/user/user.service';
 import { MailService } from 'src/mail/mail.service';
 import { agent } from 'supertest';
 import { hashedPassword } from 'src/utils/hash-password.util';
 import { date } from '@hapi/joi';
 import { MailTemplate } from 'src/mail/constant/mail.constant';
+import { AgencyService } from 'src/agency/agency.service';
 
 @Injectable()
 export class AgencyAgentService {
@@ -18,76 +19,116 @@ export class AgencyAgentService {
     private readonly prisma: PrismaService,
     private readonly userService: UserService,
     private readonly mailService: MailService,
+    private readonly agencyService: AgencyService,
   ) {}
 
   async createAgencyAgent(agencyAgentDTOs: CreateAgencyAgentDTO[]) {
-    const emails = agencyAgentDTOs.map((agencyAgentDTO) => {
-      return agencyAgentDTO.email;
-    });
-
-    await this.userService.checkEmailExist(emails);
-
-    const userPromises: Promise<Prisma.UserCreateManyInput>[] =
-      agencyAgentDTOs.map(async (agencyAgentDTO) => {
-        if (agencyAgentDTO.password) {
-          agencyAgentDTO.password = await hashedPassword(
-            agencyAgentDTO.password,
-          );
-        }
-        const user = {
-          firstName: agencyAgentDTO.firstName,
-          lastName: agencyAgentDTO.lastName,
-          email: agencyAgentDTO.email,
-          password: agencyAgentDTO.password,
-          status: UserstatusEnum.ACTIVE,
-          type: UserTypeEnum.AGENT,
-        };
-
-        return user;
+    const agent = this.prisma.$transaction(async (repo) => {
+      const emails = agencyAgentDTOs.map((agencyAgentDTO) => {
+        return agencyAgentDTO.email;
       });
 
-    const results: Prisma.UserCreateManyInput[] =
-      await Promise.all(userPromises);
-    const users: Prisma.UserCreateManyInput[] = results.map((result) => ({
-      ...result,
-    }));
+      await this.userService.checkEmailExist(emails);
 
-    await this.prisma.user.createMany({
-      data: users,
-    });
+      const userPromises: Promise<Prisma.UserCreateManyInput>[] =
+        agencyAgentDTOs.map(async (agencyAgentDTO) => {
+          if (agencyAgentDTO.password) {
+            agencyAgentDTO.password = await hashedPassword(
+              agencyAgentDTO.password,
+            );
+          }
+          const user = {
+            firstName: agencyAgentDTO.firstName,
+            lastName: agencyAgentDTO.lastName,
+            email: agencyAgentDTO.email,
+            password: agencyAgentDTO.password,
+            status: UserstatusEnum.ACTIVE,
+            type: UserTypeEnum.AGENT,
+          };
 
-    const newUsers = await this.prisma.user.findMany({
-      where: {
-        email: {
-          in: emails,
+          return user;
+        });
+
+      const results: Prisma.UserCreateManyInput[] =
+        await Promise.all(userPromises);
+      const users: Prisma.UserCreateManyInput[] = results.map((result) => ({
+        ...result,
+      }));
+
+      await repo.user.createMany({
+        data: users,
+      });
+
+      const newUsers = await repo.user.findMany({
+        where: {
+          email: {
+            in: emails,
+          },
         },
-      },
-    });
+      });
 
-    const agents: Prisma.AgencyAgentCreateManyInput[] = newUsers.map((user) => {
-      const agencyAgentDTO = agencyAgentDTOs.find(
-        (agencyAgentDTO) => agencyAgentDTO.email === user.email,
+      const agents: Prisma.AgencyAgentCreateManyInput[] = newUsers.map(
+        (user) => {
+          const agencyAgentDTO = agencyAgentDTOs.find(
+            (agencyAgentDTO) => agencyAgentDTO.email === user.email,
+          );
+          return {
+            agencyId: agencyAgentDTO.agencyId,
+            userId: user.id,
+            role: agencyAgentDTO.role,
+            isActive: true,
+            isDeleted: false,
+          };
+        },
       );
-      return {
-        agencyId: agencyAgentDTO.agencyId,
-        userId: user.id,
-        role: agencyAgentDTO.type,
-        isActive: true,
-        isDeleted: false,
-      };
-    });
 
-    return await this.prisma.agencyAgent.createMany({
-      data: agents,
+      return await repo.agencyAgent.createMany({
+        data: agents,
+      });
     });
+    return agent;
   }
 
-  async inviteAgent(agencyAgentDTOs: CreateAgencyAgentDTO[], user: User) {
-    const agents = await this.createAgencyAgent(agencyAgentDTOs);
-    const mails: string[] = agencyAgentDTOs.map(
-      (agencyAgentDTO) => agencyAgentDTO.email,
+  async updateAgent(agencyAgent: Prisma.AgencyAgentUpdateInput, id: string) {
+    this.prisma.agencyAgent.update({
+      where: {
+        id,
+      },
+      data: agencyAgent,
+    });
+    return;
+  }
+
+  async inviteAgent(agencyAgentDTOs: CreateAgencyAgentDTO[]) {
+    const agentOwner = agencyAgentDTOs.find(
+      (agent) => agent.role === AgencyAgentRoleEnum.OWNER,
     );
-    await this.mailService.send(mails, user.email, MailTemplate.INVITE_AGENT);
-    return agents;
+
+    if (agentOwner) {
+      throw new BadRequestException(
+        `Agent ${agentOwner.email} must be admin or member`,
+      );
+    }
+    await this.createAgencyAgent(agencyAgentDTOs);
+
+    const agency = await this.agencyService.getAgencyById(
+      agencyAgentDTOs[0].agencyId,
+    );
+
+    const mailPromises = agencyAgentDTOs.map(async (agent) => {
+      const user = await this.userService.getUserByEmail(agent.email);
+
+      const info = {
+        url: `https://www.prisma.io/docs?userId=${user.id}&agencyId=${agent.agencyId}`,
+      };
+      await this.mailService.send({
+        email: agent.email,
+        sender: agency.companyEmail,
+        template: MailTemplate.INVITE_AGENT,
+        info,
+      });
+    });
+
+    await Promise.all(mailPromises);
   }
 }

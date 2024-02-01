@@ -7,6 +7,8 @@ export class UserResponseDto implements User {
   lastName: string;
   email: string;
   phoneNumber: string;
+  userName: string;
+  verifyCode: string;
   status: $Enums.Userstatus;
   type: $Enums.UserType;
   inviteSent: Date;

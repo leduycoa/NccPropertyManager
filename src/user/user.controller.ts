@@ -9,6 +9,8 @@ import {
   SerializeOptions,
   UseInterceptors,
   Patch,
+  Query,
+  Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User as UserModel } from '@prisma/client';
@@ -58,5 +60,22 @@ export class UserController {
     @Body() userData: UpdateUserDto,
   ) {
     return this.userService.updateUserById(id, userData);
+  }
+
+  @Post('/send-code')
+  async sendCodeVerrify(
+    @Query('userId') userId: string,
+    @Query('agencyId') agencyId: string,
+  ) {
+    return this.userService.sendCodeVerifyUser(userId, agencyId);
+  }
+
+  @Put('/verify')
+  async verifyAndUpdateUser(
+    @Query('verifyCode') verifyCode: string,
+    @Query('userId') userId: string,
+    @Body() data: UpdateUserDto,
+  ) {
+    return this.userService.verifyAndUpdateUser(verifyCode, data, userId);
   }
 }

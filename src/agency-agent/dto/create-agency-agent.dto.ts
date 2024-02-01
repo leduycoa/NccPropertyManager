@@ -4,9 +4,13 @@ import {
   IsNotEmpty,
   IsString,
   IsUUID,
+  Matches,
+  MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
-import { AgencyAgentTypeEnum } from '../constant/agency-agent.constant';
+import { AgencyAgentRoleEnum } from '../constant/agency-agent.constant';
+import { Type } from 'class-transformer';
 
 export class CreateAgencyAgentDTO {
   @IsUUID()
@@ -14,20 +18,31 @@ export class CreateAgencyAgentDTO {
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(50)
   firstName: string;
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(50)
   lastName: string;
 
-  @IsEmail()
   @IsNotEmpty()
+  @MaxLength(50)
+  @Matches(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g, {
+    message: 'Invalid email address',
+  })
   email: string;
 
   @IsString()
   @MinLength(7)
   password?: string;
 
-  @IsEnum(AgencyAgentTypeEnum)
-  type: AgencyAgentTypeEnum;
+  @IsEnum(AgencyAgentRoleEnum)
+  role: AgencyAgentRoleEnum;
+}
+
+export class CreateAgencyAgentListDTO {
+  @ValidateNested({ each: true })
+  @Type(() => CreateAgencyAgentDTO)
+  agents: CreateAgencyAgentDTO[];
 }

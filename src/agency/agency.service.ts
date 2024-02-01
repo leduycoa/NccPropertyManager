@@ -32,6 +32,20 @@ export class AgencyService {
     });
   }
 
+  async getAgencyById(agencyId: string) {
+    const agency = await this.prisma.agency.findUnique({
+      where: {
+        id: agencyId,
+      },
+    });
+
+    if (!agency) {
+      throw new BadRequestException(`Agency with id ${agencyId} not found`);
+    }
+
+    return agency;
+  }
+
   async checkPhoneEmailExist(
     companyEmail: string,
     phoneNumber: string,

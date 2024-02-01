@@ -2,9 +2,11 @@ model User {
   id              String         @id @default(uuid())
   firstName       String
   lastName        String
+  userName        String?        @unique
   email           String         @unique
   password        String?
   phoneNumber     String?
+  verifyCode      String?
   status          Userstatus     @default(ACTIVE)
   type            UserType       @default(USER)
   inviteSent      DateTime?
