@@ -3,6 +3,7 @@ model AgencyAgent {
   agencyId       String
   userId         String
   portfolioCount Int?
+  inviteTime     DateTime?
   isDeleted      Boolean         @default(false)
   isActive       Boolean         @default(true)
   role           AgencyAgentType

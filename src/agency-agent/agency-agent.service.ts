@@ -76,6 +76,7 @@ export class AgencyAgentService {
             agencyId: agencyAgentDTO.agencyId,
             userId: user.id,
             role: agencyAgentDTO.role,
+            inviteTime: new Date(),
             isActive: true,
             isDeleted: false,
           };

@@ -1,7 +1,9 @@
 import {
   IsEmail,
+  IsEmpty,
   IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsString,
   IsUUID,
   Matches,
@@ -33,9 +35,10 @@ export class CreateAgencyAgentDTO {
   })
   email: string;
 
+  @IsOptional()
   @IsString()
   @MinLength(7)
-  password?: string;
+  password: string;
 
   @IsEnum(AgencyAgentRoleEnum)
   role: AgencyAgentRoleEnum;

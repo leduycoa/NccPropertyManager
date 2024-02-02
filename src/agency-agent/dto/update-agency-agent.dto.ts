@@ -2,6 +2,7 @@ import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsString,
   IsUUID,
   MinLength,
@@ -24,6 +25,7 @@ export class UpdateAgencyAgentDTO {
   @IsEmail()
   email?: string;
 
+  @IsOptional()
   @IsString()
   @MinLength(7)
   password?: string;
