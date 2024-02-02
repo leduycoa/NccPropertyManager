@@ -1,11 +1,9 @@
 import {
   IsDate,
-  IsEmail,
   IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
   Matches,
   MaxLength,
   MinLength,
