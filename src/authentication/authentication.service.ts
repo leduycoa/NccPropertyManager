@@ -5,6 +5,7 @@ import RegisterDto from './dto/register.dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import TokenPayload from '../interfaces/tonken.interface';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthenticationService {
@@ -26,8 +27,19 @@ export class AuthenticationService {
     return createdUser;
   }
 
-  public async getAuthenticatedUser(email: string, plainTextPassword: string) {
-    const user = await this.userService.getUserByEmail(email);
+  public async getAuthenticatedUser(
+    loginName: string,
+    plainTextPassword: string,
+  ) {
+    const isEmail = loginName.includes('@');
+
+    let user: User;
+    if (isEmail) {
+      user = await this.userService.getUserByEmail(loginName);
+    } else {
+      user = await this.userService.getUserByUserName(loginName);
+    }
+
     await this.verifyPassword(plainTextPassword, user.password);
     user.password = undefined;
     return user;
