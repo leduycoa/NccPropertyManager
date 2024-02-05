@@ -129,33 +129,15 @@ export class UserService {
     await this.updateUserById(userId, data);
   }
 
-  async checkEmailExist(email: string | string[]) {
-    let emails: string[] = [];
-    if (Array.isArray(email)) {
-      emails = email;
-      const emailArray = emails.filter((value, index, self) => {
-        return self.indexOf(value) !== index;
-      });
-
-      if (emailArray.length > 0) {
-        throw new BadRequestException(`Email ${emailArray[0]} exist in array`);
-      }
-    } else {
-      emails.push(email);
-    }
-
-    const users = await this.prisma.user.findMany({
+  async checkEmailExist(email: string) {
+    const users = await this.prisma.user.findUnique({
       where: {
-        email: {
-          in: emails,
-        },
+        email,
       },
     });
 
-    if (users.length > 0) {
-      throw new BadRequestException(
-        `Email ${users[0].email} exist in database`,
-      );
+    if (users) {
+      throw new BadRequestException('Email early exist');
     }
   }
 
@@ -166,6 +148,6 @@ export class UserService {
       },
     });
 
-    if (user) throw new BadRequestException(`User name ${userName} exist`);
+    if (user) throw new BadRequestException('User name early exist');
   }
 }

@@ -11,6 +11,7 @@ import { hashedPassword } from 'src/utils/hash-password.util';
 import { date } from '@hapi/joi';
 import { MailTemplate } from 'src/mail/constant/mail.constant';
 import { AgencyService } from 'src/agency/agency.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AgencyAgentService {
@@ -20,74 +21,55 @@ export class AgencyAgentService {
     private readonly userService: UserService,
     private readonly mailService: MailService,
     private readonly agencyService: AgencyService,
+    private readonly jwtService: JwtService,
   ) {}
 
-  async createAgencyAgent(agencyAgentDTOs: CreateAgencyAgentDTO[]) {
-    const agent = this.prisma.$transaction(async (repo) => {
-      const emails = agencyAgentDTOs.map((agencyAgentDTO) => {
-        return agencyAgentDTO.email;
+  async createAgencyAgent(agentDTO: CreateAgencyAgentDTO, token?: string) {
+    if (token) {
+      const payload: CreateAgencyAgentDTO = this.jwtService.verify(token);
+      agentDTO = {
+        ...payload,
+        ...agentDTO,
+      };
+    }
+
+    await this.userService.checkEmailExist(agentDTO.email);
+    await this.userService.checkUserNameExist(agentDTO.userName);
+
+    if (agentDTO.password) {
+      agentDTO.password = await hashedPassword(agentDTO.password);
+    }
+
+    const newAgent = this.prisma.$transaction(async (repo) => {
+      const user = {
+        firstName: agentDTO.firstName,
+        lastName: agentDTO.lastName,
+        email: agentDTO.email,
+        password: agentDTO.password,
+        status: UserstatusEnum.ACTIVE,
+        type: UserTypeEnum.AGENT,
+        userName: agentDTO.userName,
+      };
+
+      const newUser = await repo.user.create({
+        data: user,
       });
 
-      await this.userService.checkEmailExist(emails);
+      const agent = {
+        agencyId: agentDTO.agencyId,
+        userId: newUser.id,
+        role: agentDTO.role,
+        inviteTime: new Date(),
+        isActive: true,
+        isDeleted: false,
+      };
 
-      const userPromises: Promise<Prisma.UserCreateManyInput>[] =
-        agencyAgentDTOs.map(async (agencyAgentDTO) => {
-          if (agencyAgentDTO.password) {
-            agencyAgentDTO.password = await hashedPassword(
-              agencyAgentDTO.password,
-            );
-          }
-          const user = {
-            firstName: agencyAgentDTO.firstName,
-            lastName: agencyAgentDTO.lastName,
-            email: agencyAgentDTO.email,
-            password: agencyAgentDTO.password,
-            status: UserstatusEnum.ACTIVE,
-            type: UserTypeEnum.AGENT,
-          };
-
-          return user;
-        });
-
-      const results: Prisma.UserCreateManyInput[] =
-        await Promise.all(userPromises);
-      const users: Prisma.UserCreateManyInput[] = results.map((result) => ({
-        ...result,
-      }));
-
-      await repo.user.createMany({
-        data: users,
+      const newAgent = await repo.agencyAgent.create({
+        data: agent,
       });
-
-      const newUsers = await repo.user.findMany({
-        where: {
-          email: {
-            in: emails,
-          },
-        },
-      });
-
-      const agents: Prisma.AgencyAgentCreateManyInput[] = newUsers.map(
-        (user) => {
-          const agencyAgentDTO = agencyAgentDTOs.find(
-            (agencyAgentDTO) => agencyAgentDTO.email === user.email,
-          );
-          return {
-            agencyId: agencyAgentDTO.agencyId,
-            userId: user.id,
-            role: agencyAgentDTO.role,
-            inviteTime: new Date(),
-            isActive: true,
-            isDeleted: false,
-          };
-        },
-      );
-
-      return await repo.agencyAgent.createMany({
-        data: agents,
-      });
+      return newAgent;
     });
-    return agent;
+    return newAgent;
   }
 
   async updateAgent(agencyAgent: Prisma.AgencyAgentUpdateInput, id: string) {
@@ -110,17 +92,18 @@ export class AgencyAgentService {
         `Agent ${agentOwner.email} must be admin or member`,
       );
     }
-    await this.createAgencyAgent(agencyAgentDTOs);
 
     const agency = await this.agencyService.getAgencyById(
       agencyAgentDTOs[0].agencyId,
     );
 
     const mailPromises = agencyAgentDTOs.map(async (agent) => {
-      const user = await this.userService.getUserByEmail(agent.email);
-
+      const payload = {
+        ...agent,
+      };
+      const token = this.jwtService.sign(payload);
       const info = {
-        url: `https://www.prisma.io/docs?userId=${user.id}&agencyId=${agent.agencyId}`,
+        url: `https://www.prisma.io/docs?token=${token}`,
       };
       await this.mailService.send({
         email: agent.email,

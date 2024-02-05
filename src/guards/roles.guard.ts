@@ -16,23 +16,23 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    const roles = this.reflector.get(Roles, context.getHandler());
+    const roleUsers = this.reflector.get(Roles, context.getHandler());
     const roleAgents = this.reflector.get(RoleAgents, context.getHandler());
 
-    let check = true;
-    if (roles) {
-      check = roles.some((role) => user.type === role);
+    let permission: boolean = true;
+    if (roleUsers) {
+      permission = roleUsers.some((role) => user.type === role);
     }
-    if (roleAgents) {
+    if (roleAgents && !permission) {
       const agent = await this.prisma.agencyAgent.findFirst({
         where: {
           userId: user.id,
         },
       });
-      check =
+      permission =
         user.type === UserTypeEnum.AGENT &&
         roleAgents.some((role) => agent.role === role);
     }
-    return check;
+    return permission;
   }
 }
