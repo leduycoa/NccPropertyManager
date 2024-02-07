@@ -1,29 +1,53 @@
-import { PrismaClient } from '@prisma/client';
+import { date } from '@hapi/joi';
+import { Prisma, PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 // initialize Prisma Client
 const prisma = new PrismaClient();
 
 async function main() {
+  const emails: string[] = ['admin1@gmail.com', 'admin2@gmail.com'];
   await prisma.user.createMany({
     data: [
       {
         firstName: 'admin',
         lastName: '1',
-        email: 'admin1@gmail.com',
+        email: emails[0],
         password: await bcrypt.hash('admin123456', 10),
         status: 'ACTIVE',
-        type: 'ADMIN',
       },
       {
         firstName: 'admin',
         lastName: '2',
-        email: 'admin2@gmail.com',
+        email: emails[1],
         password: await bcrypt.hash('admin123456', 10),
         status: 'ACTIVE',
-        type: 'ADMIN',
       },
     ],
+  });
+
+  const users = await prisma.user.findMany({
+    where: {
+      email: {
+        in: emails,
+      },
+    },
+  });
+
+  const contacts = users.map((user, index) => {
+    const contact: Prisma.ContactCreateManyInput = {
+      firstName: 'admin',
+      lastName: `${index}`,
+      email: emails[index],
+      type: 'ADMIN',
+      status: 'ACTIVE',
+      userId: user.id,
+    };
+    return contact;
+  });
+
+  await prisma.contact.createMany({
+    data: contacts,
   });
 
   console.log('seeding success');

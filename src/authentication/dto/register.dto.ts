@@ -7,10 +7,8 @@ import {
   IsOptional,
   IsDate,
 } from 'class-validator';
-import {
-  UserstatusEnum,
-  UserTypeEnum,
-} from '../../user/constants/user.constant';
+import { UserStatusEnum } from '../../user/constants/user.constant';
+import { ContactTypeEnum } from 'src/contact/constants/contact.constant';
 export class RegisterDto {
   @IsString()
   @IsNotEmpty()
@@ -35,11 +33,11 @@ export class RegisterDto {
 
   @IsString()
   @IsOptional()
-  status: UserstatusEnum;
+  status: UserStatusEnum;
 
   @IsString()
   @IsOptional()
-  type: UserTypeEnum;
+  type: ContactTypeEnum;
 
   @IsDate()
   @IsOptional()

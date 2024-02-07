@@ -1,0 +1,26 @@
+model ContactProperty {
+    id         Int                       @id @default(autoincrement())
+    contactId  Int
+    propertyId Int
+    status     ContactPropertyStatusEnum @default(ACTIVE)
+    type       ContactPropertyTypeEnum   @default(AGENT)
+    createdAt  DateTime                  @default(now())
+    updatedAt  DateTime                  @updatedAt
+    // Define the userProperties relation
+    contact    Contact                   @relation(fields: [contactId], references: [id])
+    property   Property                  @relation(fields: [propertyId], references: [id])
+
+    @@map("contactProperties")
+}
+
+enum ContactPropertyStatusEnum {
+    ACTIVE
+    DELETED
+    INACTIVE
+}
+
+enum ContactPropertyTypeEnum {
+    TENANT
+    LANDLORD
+    AGENT
+}

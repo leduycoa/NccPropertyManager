@@ -1,0 +1,22 @@
+model Agent {
+  id                   Int             @id @default(autoincrement())
+  companyId            Int
+  contactId            Int
+  assignPortfolioCount Int
+  isDeleted            Boolean         @default(false)
+  isActive             Boolean         @default(true)
+  role                 AgencyAgentType
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  // Define the relationships
+  company              Company         @relation(fields: [companyId], references: [id])
+  contact              Contact         @relation(fields: [contactId], references: [id])
+
+  @@map("agents")
+}
+
+enum AgencyAgentType {
+  OWNER
+  ADMIN
+  MEMBER
+}

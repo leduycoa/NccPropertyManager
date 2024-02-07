@@ -1,0 +1,18 @@
+model Company {
+  id                Int               @id @default(autoincrement())
+  name              String
+  logo              String
+  address           String
+  phoneNumber       String
+  companyEmail      String
+  isDeleted         Boolean
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  // Define the agencyAgents relation
+  agents            Agent[]
+  companySettings   CompanySettings?
+  companyProperties CompanyProperty[]
+  onboardTrackings  OnboardTracking[]
+
+  @@map("companies")
+}

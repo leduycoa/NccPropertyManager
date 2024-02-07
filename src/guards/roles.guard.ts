@@ -1,9 +1,9 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Roles } from '../decorators/roles.decorator';
+import { RoleContacts } from '../decorators/roles-contact.decorator';
 import { RoleAgents } from 'src/decorators/role-agents.decorator';
-import { UserTypeEnum } from 'src/user/constants/user.constant';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ContactTypeEnum } from 'src/contact/constants/contact.constant';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -15,23 +15,44 @@ export class RolesGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
+    const payload = request.body;
 
-    const roleUsers = this.reflector.get(Roles, context.getHandler());
+    const roleContacts = this.reflector.get(RoleContacts, context.getHandler());
     const roleAgents = this.reflector.get(RoleAgents, context.getHandler());
 
+    const contacts = await this.prisma.contact.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
     let permission: boolean = true;
-    if (roleUsers) {
-      permission = roleUsers.some((role) => user.type === role);
+    if (roleContacts) {
+      permission = roleContacts.some((role) =>
+        contacts.some((contact) => contact.type === role),
+      );
+    } else {
+      permission = false;
     }
+
     if (roleAgents && !permission) {
-      const agent = await this.prisma.agencyAgent.findFirst({
-        where: {
-          userId: user.id,
-        },
-      });
-      permission =
-        user.type === UserTypeEnum.AGENT &&
-        roleAgents.some((role) => agent.role === role);
+      if (!contacts.some((contact) => contact.type === ContactTypeEnum.AGENT)) {
+        permission = false;
+      } else {
+        const contactIds = contacts.map((contact) => contact.id);
+        const agents = await this.prisma.agent.findMany({
+          where: {
+            AND: {
+              contactId: {
+                in: contactIds,
+              },
+              companyId: payload.companyId,
+            },
+          },
+        });
+        permission = roleAgents.some((role) =>
+          agents.some((a) => a.role === role),
+        );
+      }
     }
     return permission;
   }

@@ -8,7 +8,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { UserstatusEnum, UserTypeEnum } from '../constants/user.constant';
+import { UserStatusEnum } from '../constants/user.constant';
 import { Prisma } from '@prisma/client';
 import IsJsonObject from '../../utils/is-json-object.util';
 export class CreateUserDto {
@@ -35,26 +35,13 @@ export class CreateUserDto {
   password: string;
 
   @IsString()
-  @IsNotEmpty()
-  phoneNumber: string;
-
-  @IsString()
-  @IsEnum(UserstatusEnum)
+  @IsEnum(UserStatusEnum)
   @IsOptional()
-  status: UserstatusEnum;
-
-  @IsString()
-  @IsEnum(UserTypeEnum)
-  @IsOptional()
-  type: UserTypeEnum;
+  status: UserStatusEnum;
 
   @IsDate()
   @IsOptional()
   inviteSent: Date;
-
-  @IsJsonObject()
-  @IsOptional()
-  onboardTracking: Prisma.InputJsonObject;
 }
 
 export default CreateUserDto;

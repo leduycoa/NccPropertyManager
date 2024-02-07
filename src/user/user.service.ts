@@ -4,8 +4,8 @@ import { User, Prisma } from '@prisma/client';
 import { hashedPassword } from 'src/utils/hash-password.util';
 import { randomUUID } from 'crypto';
 import { MailService } from 'src/mail/mail.service';
-import { AgencyService } from 'src/agency/agency.service';
 import { MailTemplate } from 'src/mail/constant/mail.constant';
+import { CompanyService } from 'src/company/company.service';
 
 @Injectable()
 export class UserService {
@@ -13,10 +13,10 @@ export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
-    private readonly agencyService: AgencyService,
+    private readonly companyService: CompanyService,
   ) {}
 
-  async getUserById(id: string) {
+  async getUserById(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
@@ -27,14 +27,6 @@ export class UserService {
   async getUserByEmail(email: string) {
     const user = await this.prisma.user.findUnique({
       where: { email },
-    });
-
-    return user;
-  }
-
-  async getUserByUserName(userName: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { userName },
     });
 
     return user;
@@ -52,26 +44,18 @@ export class UserService {
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
     await this.checkEmailExist(data.email);
-    if (data.userName) {
-      await this.checkUserNameExist(data.userName);
-    }
     return this.prisma.user.create({
       data,
     });
   }
 
   async updateUserById(
-    id: string,
+    id: number,
     data: Prisma.UserUpdateInput,
   ): Promise<void> {
     if (data.email) {
       await this.checkEmailExist(data.email.toString());
     }
-
-    if (data.userName) {
-      await this.checkUserNameExist(data.userName.toString());
-    }
-
     await this.getUserById(id);
     if (typeof data.password === 'string') {
       data.password = await hashedPassword(data.password);
@@ -80,7 +64,7 @@ export class UserService {
     return;
   }
 
-  async deleteUserById(id: string): Promise<void> {
+  async deleteUserById(id: number): Promise<void> {
     await this.getUserById(id);
     await this.prisma.user.delete({
       where: {
@@ -90,24 +74,15 @@ export class UserService {
     return;
   }
 
-  async sendCodeVerifyUser(userId: string, agencyId: string) {
+  async sendCodeVerifyUser(userId: number, companyyId: number) {
     const user = await this.getUserById(userId);
     const code = randomUUID();
 
-    await this.prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        verifyCode: code,
-      },
-    });
-
-    const agency = await this.agencyService.getAgencyById(agencyId);
+    const company = await this.companyService.getCompanyById(companyyId);
 
     await this.mailService.send({
       email: user.email,
-      sender: agency.companyEmail,
+      sender: company.companyEmail,
       template: MailTemplate.VERIFY_TEMPLATE,
       info: {
         code,
@@ -118,36 +93,22 @@ export class UserService {
   async verifyAndUpdateUser(
     verifyCode: string,
     data: Prisma.UserUpdateInput,
-    userId: string,
+    userId: number,
   ) {
     const user = await this.getUserById(userId);
-
-    if (user.verifyCode !== verifyCode) {
-      throw new BadRequestException('Verify code incorrect');
-    }
 
     await this.updateUserById(userId, data);
   }
 
   async checkEmailExist(email: string) {
-    const users = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: {
         email,
       },
     });
 
-    if (users) {
+    if (user) {
       throw new BadRequestException('Email early exist');
     }
-  }
-
-  async checkUserNameExist(userName: string) {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        userName,
-      },
-    });
-
-    if (user) throw new BadRequestException('User name early exist');
   }
 }
