@@ -44,19 +44,19 @@ export class UserController {
 
   @Get(':id')
   @UseInterceptors(new TransformDataInterceptor(UserResponseDto))
-  async getUserById(@Param('id') id: string) {
+  async getUserById(@Param('id') id: number) {
     return this.userService.getUserById(id);
   }
 
   @Delete(':id')
-  async deleteUserById(@Param('id') id: string) {
+  async deleteUserById(@Param('id') id: number) {
     return this.userService.deleteUserById(id);
   }
 
   @Patch(':id')
   @UseInterceptors(new TransformDataInterceptor(UserResponseDto))
   async updateUserById(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() userData: UpdateUserDto,
   ) {
     return this.userService.updateUserById(id, userData);
@@ -64,16 +64,16 @@ export class UserController {
 
   @Post('/send-code')
   async sendCodeVerrify(
-    @Query('userId') userId: string,
-    @Query('agencyId') agencyId: string,
+    @Query('userId') userId: number,
+    @Query('agencyId') companyId: number,
   ) {
-    return this.userService.sendCodeVerifyUser(userId, agencyId);
+    return this.userService.sendCodeVerifyUser(userId, companyId);
   }
 
   @Put('/verify')
   async verifyAndUpdateUser(
     @Query('verifyCode') verifyCode: string,
-    @Query('userId') userId: string,
+    @Query('userId') userId: number,
     @Body() data: UpdateUserDto,
   ) {
     return this.userService.verifyAndUpdateUser(verifyCode, data, userId);

@@ -1,0 +1,12 @@
+model CompanySettings {
+  id            Int      @id @default(autoincrement())
+  companyId     Int      @unique
+  config        Json?    @db.Json
+  outgoingEmail String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  // Define the relationship
+  company       Company  @relation(fields: [companyId], references: [id])
+
+  @@map("companySettings")
+}

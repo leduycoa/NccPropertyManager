@@ -1,16 +1,15 @@
 import {
   IsEmail,
   IsEnum,
-  IsNotEmpty,
+  IsInt,
   IsOptional,
   IsString,
-  IsUUID,
   MinLength,
 } from 'class-validator';
-import { AgencyAgentRoleEnum } from '../constant/agency-agent.constant';
+import { AgentRoleEnum } from '../constant/agent.constant';
 
 export class UpdateAgencyAgentDTO {
-  @IsUUID()
+  @IsInt()
   agencyId: string;
 
   @IsString()
@@ -18,9 +17,6 @@ export class UpdateAgencyAgentDTO {
 
   @IsString()
   lastName?: string;
-
-  @IsString()
-  userName?: string;
 
   @IsEmail()
   email?: string;
@@ -30,6 +26,6 @@ export class UpdateAgencyAgentDTO {
   @MinLength(7)
   password?: string;
 
-  @IsEnum(AgencyAgentRoleEnum)
-  role: AgencyAgentRoleEnum;
+  @IsEnum(AgentRoleEnum)
+  role: AgentRoleEnum;
 }

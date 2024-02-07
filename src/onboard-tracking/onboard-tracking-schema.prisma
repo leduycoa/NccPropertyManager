@@ -1,0 +1,19 @@
+model OnboardTracking {
+    id        Int                       @id @default(autoincrement())
+    status    OnboardTrackingStatusEnum @default(SENT_DELIVERED)
+    userId    Int                       @unique
+    companyId Int
+    createdAt DateTime                  @default(now())
+    updatedAt DateTime                  @updatedAt
+    // Define the relationships
+    user      User                      @relation(fields: [userId], references: [id])
+    company   Company                   @relation(fields: [companyId], references: [id])
+
+    @@map("onboardTrackings")
+}
+
+enum OnboardTrackingStatusEnum {
+    SENT_NOT_DELIVERED
+    SENT_DELIVERED
+    DELIVERED_READ
+}

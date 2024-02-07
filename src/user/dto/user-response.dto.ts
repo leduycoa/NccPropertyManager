@@ -2,15 +2,14 @@ import { $Enums, Prisma, User } from '@prisma/client';
 import { Exclude } from 'class-transformer';
 
 export class UserResponseDto implements User {
-  id: string;
+  id: number;
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
   userName: string;
   verifyCode: string;
-  status: $Enums.Userstatus;
-  type: $Enums.UserType;
+  status: $Enums.UserStatusEnum;
   inviteSent: Date;
   onboardTracking: Prisma.JsonValue;
   @Exclude()

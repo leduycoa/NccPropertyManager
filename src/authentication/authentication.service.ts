@@ -27,18 +27,8 @@ export class AuthenticationService {
     return createdUser;
   }
 
-  public async getAuthenticatedUser(
-    loginName: string,
-    plainTextPassword: string,
-  ) {
-    const isEmail = loginName.includes('@');
-
-    let user: User;
-    if (isEmail) {
-      user = await this.userService.getUserByEmail(loginName);
-    } else {
-      user = await this.userService.getUserByUserName(loginName);
-    }
+  public async getAuthenticatedUser(email: string, plainTextPassword: string) {
+    const user: User = await this.userService.getUserByEmail(email);
 
     await this.verifyPassword(plainTextPassword, user.password);
     user.password = undefined;
@@ -59,7 +49,7 @@ export class AuthenticationService {
     }
   }
 
-  public getCookieWithJwtToken(id: string) {
+  public getCookieWithJwtToken(id: number) {
     const payload: TokenPayload = { id };
     const token = this.jwtService.sign(payload);
     return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(

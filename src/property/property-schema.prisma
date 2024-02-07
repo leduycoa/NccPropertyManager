@@ -1,15 +1,14 @@
 model Property {
-  id             String           @id @default(uuid())
-  streetline     String
-  status         Propertystatus   @default(ACTIVE)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  @@map("properties")
-
+  id                Int               @id @default(autoincrement())
+  streetline        String
+  status            Propertystatus    @default(ACTIVE)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
   // Define the userProperties relation
-  userProperties UserProperty[]
-  agencyProperties AgencyProperty[]
+  contactProperties ContactProperty[]
+  companyProperties CompanyProperty[]
 
+  @@map("properties")
 }
 
 enum Propertystatus {

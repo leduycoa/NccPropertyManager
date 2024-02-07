@@ -1,23 +1,25 @@
 import {
-  IsEmail,
-  IsEmpty,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUUID,
   Matches,
   MaxLength,
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { AgencyAgentRoleEnum } from '../constant/agency-agent.constant';
+import { AgentRoleEnum } from '../constant/agent.constant';
 import { Type } from 'class-transformer';
 
-export class CreateAgencyAgentDTO {
+export class CreateAgentDTO {
   @IsOptional()
-  @IsUUID()
-  agencyId: string;
+  @IsInt()
+  companyId: number;
+
+  @IsOptional()
+  @IsInt()
+  userId: number;
 
   @IsOptional()
   @IsString()
@@ -41,21 +43,16 @@ export class CreateAgencyAgentDTO {
 
   @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  userName: string;
-
-  @IsOptional()
-  @IsString()
   @MinLength(7)
   password: string;
 
   @IsOptional()
-  @IsEnum(AgencyAgentRoleEnum)
-  role: AgencyAgentRoleEnum;
+  @IsEnum(AgentRoleEnum)
+  role: AgentRoleEnum;
 }
 
-export class CreateAgencyAgentListDTO {
+export class CreateAgentListDTO {
   @ValidateNested({ each: true })
-  @Type(() => CreateAgencyAgentDTO)
-  agents: CreateAgencyAgentDTO[];
+  @Type(() => CreateAgentDTO)
+  agents: CreateAgentDTO[];
 }

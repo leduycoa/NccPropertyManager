@@ -1,5 +1,5 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { UserstatusEnum, UserTypeEnum } from '../constants/user.constant';
+import { UserStatusEnum } from '../constants/user.constant';
 import { CanBeUndefined } from '../../utils/can-be-undefined.util';
 export class UpdateUserDto {
   @IsString()
@@ -20,14 +20,9 @@ export class UpdateUserDto {
   phoneNumber?: string;
 
   @IsString()
-  @IsEnum(UserstatusEnum)
+  @IsEnum(UserStatusEnum)
   @CanBeUndefined()
-  status?: UserstatusEnum;
-
-  @IsString()
-  @IsEnum(UserTypeEnum)
-  @CanBeUndefined()
-  type?: UserTypeEnum;
+  status?: UserStatusEnum;
 }
 
 export default UpdateUserDto;
