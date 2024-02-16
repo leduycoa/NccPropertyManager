@@ -8,6 +8,8 @@ import { CreateAgentDTO } from './dto/create-agent.dto';
 import { ContactTypeEnum, Prisma } from '@prisma/client';
 import { AgentRoleEnum } from './constant/agent.constant';
 import { CompanyService } from 'src/company/company.service';
+import { pagination } from 'src/utils/pagination.util';
+import Pagination from 'src/interfaces/pagination.interface';
 
 @Injectable()
 export class AgentService {
@@ -100,5 +102,48 @@ export class AgentService {
     });
 
     await Promise.all(mailPromises);
+  }
+
+  async getAgentsByCompanyId(
+    companyId: number,
+    page: number,
+    pageSize: number,
+  ) {
+    const { skip, take } = pagination(page, pageSize);
+    const agents = await this.prisma.agent.findMany({
+      select: {
+        role: true,
+        contact: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            user: {
+              select: {
+                inviteSent: true,
+              },
+            },
+          },
+        },
+        isActive: true,
+        isDeleted: true,
+      },
+      where: {
+        companyId,
+      },
+
+      skip,
+      take,
+    });
+    const totalItem = agents.length;
+    const totalPage = Math.ceil(totalItem / pageSize);
+    const data: Pagination = {
+      page,
+      pageSize,
+      totalItem,
+      totalPage,
+      data: agents,
+    };
+    return data;
   }
 }
