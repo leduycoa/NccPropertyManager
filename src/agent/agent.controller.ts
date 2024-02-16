@@ -1,4 +1,12 @@
-import { Body, Controller, Post, UseGuards, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Query,
+  Get,
+  UseInterceptors,
+} from '@nestjs/common';
 import { RoleContacts } from 'src/decorators/roles-contact.decorator';
 import JwtAuthenticationGuard from 'src/guards/jwt-authentication.guard';
 import { RolesGuard } from 'src/guards/roles.guard';
@@ -29,5 +37,16 @@ export class AgentController {
   @RoleAgents([AgentRoleEnum.OWNER])
   inviteAgent(@Body() agentDTOs: CreateAgentListDTO) {
     return this.agentService.inviteAgent(agentDTOs.agents);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthenticationGuard, RolesGuard)
+  @RoleContacts([ContactTypeEnum.AGENT])
+  getAgentByCompany(
+    @Query('companyId') companyId: number,
+    @Query('page') page: number = 0,
+    @Query('pageSize') pageSize: number = 100,
+  ) {
+    return this.agentService.getAgentsByCompanyId(companyId, page, pageSize);
   }
 }
