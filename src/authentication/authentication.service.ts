@@ -5,13 +5,16 @@ import RegisterDto from './dto/register.dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import TokenPayload from '../interfaces/tonken.interface';
-import { User } from '@prisma/client';
+import { Contact, User } from '@prisma/client';
+import { ContactService } from 'src/contact/contact.service';
+import { ContactStatusEnum } from 'src/contact/constants/contact.constant';
 
 @Injectable()
 export class AuthenticationService {
   private readonly logger = new Logger(AuthenticationService.name);
   constructor(
     private readonly userService: UserService,
+    private readonly contactService: ContactService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -29,10 +32,25 @@ export class AuthenticationService {
 
   public async getAuthenticatedUser(email: string, plainTextPassword: string) {
     const user: User = await this.userService.getUserByEmail(email);
-
     await this.verifyPassword(plainTextPassword, user.password);
     user.password = undefined;
     return user;
+  }
+
+  public async getAuthenticatedContact(
+    email: string,
+    plainTextPassword: string,
+  ) {
+    const contact = await this.contactService.getConctactByEmail(email);
+    if (contact.status === ContactStatusEnum.DELETED) {
+      throw new BadRequestException('Account is deleted');
+    }
+    if (contact.agents[0] && !contact.agents[0].isActive) {
+      throw new BadRequestException('Account is inactive');
+    }
+    await this.verifyPassword(plainTextPassword, contact.password);
+    contact.password = undefined;
+    return contact;
   }
 
   private async verifyPassword(

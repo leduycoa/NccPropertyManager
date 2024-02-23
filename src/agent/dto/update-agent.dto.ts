@@ -26,6 +26,9 @@ export class UpdateAgencyAgentDTO {
   @MinLength(7)
   password?: string;
 
+  isDeleted?: boolean;
+  isActive?: boolean;
+
   @IsEnum(AgentRoleEnum)
   role: AgentRoleEnum;
 }
