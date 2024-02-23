@@ -6,6 +6,9 @@ import { randomUUID } from 'crypto';
 import { MailService } from 'src/mail/mail.service';
 import { MailTemplate } from 'src/mail/constant/mail.constant';
 import { CompanyService } from 'src/company/company.service';
+import { pagination } from 'src/utils/pagination.util';
+import Pagination from 'src/interfaces/pagination.interface';
+import { UserStatusEnum } from './constants/user.constant';
 
 @Injectable()
 export class UserService {
@@ -22,6 +25,44 @@ export class UserService {
     });
     if (!user) throw new BadRequestException(`User with id ${id} not found`);
     return user;
+  }
+
+  async getUserInvitedByCompanyId(
+    companyId: number,
+    page: number,
+    pageSize: number,
+  ) {
+    const { skip, take } = pagination(page, pageSize);
+    const users = await this.prisma.user.findMany({
+      select: {
+        firstName: true,
+        lastName: true,
+        inviteSent: true,
+        onboardTracking: {
+          select: {
+            status: true,
+          },
+          where: {
+            companyId,
+          },
+        },
+      },
+      where: {
+        status: UserStatusEnum.INVITED,
+      },
+      skip,
+      take,
+    });
+    const totalItem = users.length;
+    const totalPage = Math.ceil(totalItem / pageSize);
+    const data: Pagination = {
+      page,
+      pageSize,
+      totalItem,
+      totalPage,
+      data: users,
+    };
+    return data;
   }
 
   async getUserByEmail(email: string) {
