@@ -7,10 +7,13 @@ import { LocalStrategy } from '../authentication/strategies/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { ContactModule } from 'src/contact/contact.module';
+import { LocalContactStrategy } from './strategies/contact.strategy';
 
 @Module({
   imports: [
     UserModule,
+    ContactModule,
     PassportModule,
     ConfigModule,
     JwtModule.registerAsync({
@@ -24,7 +27,12 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       }),
     }),
   ],
-  providers: [AuthenticationService, LocalStrategy, JwtStrategy],
+  providers: [
+    AuthenticationService,
+    LocalStrategy,
+    JwtStrategy,
+    LocalContactStrategy,
+  ],
   controllers: [AuthenticationController],
 })
 export class AuthenticationModule {}

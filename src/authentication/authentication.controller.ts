@@ -20,6 +20,8 @@ import { ApiBody } from '@nestjs/swagger';
 import RequestWithUser from '../interfaces/request-with-user.interface';
 import { TransformDataInterceptor } from '../Interceptors/transform-data.interceptor';
 import { UserResponseDto } from '../user/dto/user-response.dto';
+import { LocalConatactAuthenticationGuard } from 'src/guards/local-contact-authentication.guard';
+import RequestWithContact from 'src/interfaces/request-with-contact.interface';
 
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -43,6 +45,17 @@ export class AuthenticationController {
     const cookie = this.authenticationService.getCookieWithJwtToken(user.id);
     request.res.setHeader('Set-Cookie', cookie);
     return user;
+  }
+
+  @HttpCode(200)
+  @ApiBody({ type: LogInDto })
+  @UseGuards(LocalConatactAuthenticationGuard)
+  @Post('/log-in/contact')
+  async logInContact(@Req() request: RequestWithContact) {
+    const { contact } = request;
+    const cookie = this.authenticationService.getCookieWithJwtToken(contact.id);
+    request.res.setHeader('Set-Cookie', cookie);
+    return contact;
   }
 
   @UseGuards(JwtAuthenticationGuard)

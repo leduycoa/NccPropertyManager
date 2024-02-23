@@ -5,11 +5,15 @@ import { UserService } from 'src/user/user.service';
 import { MailService } from 'src/mail/mail.service';
 import { MailTemplate } from 'src/mail/constant/mail.constant';
 import { CreateAgentDTO } from './dto/create-agent.dto';
-import { ContactTypeEnum, Prisma } from '@prisma/client';
+import { ContactStatusEnum, ContactTypeEnum, Prisma } from '@prisma/client';
 import { AgentRoleEnum } from './constant/agent.constant';
 import { CompanyService } from 'src/company/company.service';
 import { pagination } from 'src/utils/pagination.util';
 import Pagination from 'src/interfaces/pagination.interface';
+import { OnboardTrackingService } from 'src/onboard-tracking/onboard-tracking.service';
+import { ContactService } from 'src/contact/contact.service';
+import { ContactPropertyService } from 'src/contact-property/contact-property.service';
+import { ContactPropertyStatusEnum } from 'src/contact-property/constant/contact-property.constant';
 
 @Injectable()
 export class AgentService {
@@ -19,6 +23,9 @@ export class AgentService {
     private readonly userService: UserService,
     private readonly mailService: MailService,
     private readonly companyService: CompanyService,
+    private readonly onboardTrackingService: OnboardTrackingService,
+    private readonly contactService: ContactService,
+    private readonly contactPropertyService: ContactPropertyService,
   ) {}
 
   async createAgent(agentDTO: CreateAgentDTO) {
@@ -29,6 +36,7 @@ export class AgentService {
         firstName: agentDTO.firstName,
         lastName: agentDTO.lastName,
         email: agentDTO.email,
+        password: agentDTO.password,
         status: UserStatusEnum.ACTIVE,
         type: ContactTypeEnum.AGENT,
         userId: user.id,
@@ -55,14 +63,26 @@ export class AgentService {
     return newAgent;
   }
 
-  async updateAgent(agent: Prisma.AgentUpdateInput, id: number) {
-    this.prisma.agent.update({
+  async updateAgent(data: Prisma.AgentUpdateInput, id: number) {
+    if (!data.isActive) {
+      data.assignPortfolioCount = 0;
+      this.contactPropertyService.updateContactPropertyByContact(
+        data.company.connect.id,
+        { status: ContactPropertyStatusEnum.DELETED },
+      );
+    }
+    const agent = await this.prisma.agent.update({
       where: {
         id,
       },
-      data: agent,
+      data,
     });
-    return;
+    if (data.isDeleted) {
+      await this.contactService.updateContact(agent.contactId, {
+        status: ContactStatusEnum.DELETED,
+      });
+    }
+    return agent;
   }
 
   async inviteAgent(agentDTOs: CreateAgentDTO[]) {
@@ -85,13 +105,18 @@ export class AgentService {
         firstName: agentDTO.firstName,
         lastName: agentDTO.lastName,
         email: agentDTO.email,
-        password: agentDTO.password,
-        status: UserStatusEnum.ACTIVE,
+        status: UserStatusEnum.INVITED,
         inviteSent: new Date(),
       };
       const newUser = await this.userService.createUser(user);
+      agentDTO.userId = newUser.id;
+      const newAgent = await this.createAgent(agentDTO);
+      await this.onboardTrackingService.createOnboardTracking({
+        userId: newUser.id,
+        companyId: agentDTO.companyId,
+      });
       const info = {
-        url: `https://www.prisma.io/docs?userId=${newUser.id}&aencyId=${agentDTO.companyId}`,
+        url: `https://www.prisma.io/docs?agentId=${newAgent.id}`,
       };
       await this.mailService.send({
         email: agentDTO.email,

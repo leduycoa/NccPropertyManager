@@ -6,6 +6,7 @@ import {
   Query,
   Get,
   UseInterceptors,
+  Put,
 } from '@nestjs/common';
 import { RoleContacts } from 'src/decorators/roles-contact.decorator';
 import JwtAuthenticationGuard from 'src/guards/jwt-authentication.guard';
@@ -30,6 +31,15 @@ export class AgentController {
   @UseGuards(JwtAuthenticationGuard)
   createAgent(@Body() agentDTO: CreateAgentDTO) {
     return this.agentService.createAgent(agentDTO);
+  }
+
+  @Put()
+  @UseGuards(JwtAuthenticationGuard)
+  updateAgent(
+    @Body() agentDTO: CreateAgentDTO,
+    @Query('agentId') agentId: number,
+  ) {
+    return this.agentService.updateAgent(agentDTO, agentId);
   }
 
   @Post('/invite-agent')
