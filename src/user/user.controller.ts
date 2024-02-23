@@ -42,6 +42,19 @@ export class UserController {
     });
   }
 
+  @Get('/agent')
+  async getUserInvitedByCompanyId(
+    @Query('companyId') companyId: number,
+    @Query('page') page: number = 1,
+    @Query('pageSize') pageSize: number = 100,
+  ) {
+    return this.userService.getUserInvitedByCompanyId(
+      companyId,
+      page,
+      pageSize,
+    );
+  }
+
   @Get(':id')
   @UseInterceptors(new TransformDataInterceptor(UserResponseDto))
   async getUserById(@Param('id') id: number) {
